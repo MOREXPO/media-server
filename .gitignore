@@ -1,0 +1,16 @@
+# Ignore all files in the content directory
+
+content/*
+
+# provision/*
+provision/jellyseerr/*
+provision/ombi/*
+provision/jellyfin/*
+provision/qbittorrent/*
+provision/bazarr/*
+provision/prowlarr/*
+provision/lidarr/*
+provision/sonarr/*
+provision/radarr/*
+provision/plex/*
+

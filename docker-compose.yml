@@ -1,0 +1,169 @@
+version: '3.9'
+
+services:
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - JELLYFIN_PublishedServerUrl=http://192.168.1.132 #optional
+    volumes:
+      - ./provision/jellyfin/library:/config
+      - ./content/media:/data
+    ports:
+      - 8096:8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  plex:
+    image: plexinc/pms-docker
+    container_name: plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      - HOSTNAME=”PlexServer”
+    volumes:
+      - ./provision/plex:/config
+      - ./content/media:/data/media
+    ports: # when network: bridge
+      - "32400:32400/tcp" 
+      - "8324:8324/tcp" # Required if network: bridge
+    privileged: true # libusb_init failed
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/radarr:/config
+      - ./content:/data
+    ports:
+      - "7878:7878"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/sonarr:/config
+      - ./content:/data
+    ports:
+      - "8989:8989"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  lidarr:
+    image: linuxserver/lidarr
+    container_name: lidarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/lidarr:/config
+      - ./content:/data
+    ports:
+      - "8686:8686"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  prowlarr:
+    image: linuxserver/prowlarr
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  bazarr:
+    image: linuxserver/bazarr
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/bazarr:/config
+      - ./content:/data
+    ports:
+      - "6767:6767"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/qbittorrent:/config
+      - ./content/torrents:/data/torrents
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  ombi:
+    image: linuxserver/ombi
+    container_name: ombi
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./provision/ombi:/config
+    ports:
+      - "3579:3579"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+        - LOG_LEVEL=debug
+        - TZ=Europe/Madrid
+    ports:
+        - 5055:5055
+    volumes:
+        - ./provision/jellyseerr/config:/app/config
+    restart: unless-stopped
+    networks:
+      - media-network
+
+networks:
+  media-network:
