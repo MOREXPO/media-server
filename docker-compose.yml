@@ -1,7 +1,4 @@
-version: '3.9'
-
 services:
-
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
@@ -9,34 +6,14 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Madrid
-      - JELLYFIN_PublishedServerUrl=http://192.168.1.132 #optional
     volumes:
-      - ./provision/jellyfin/library:/config
+      - ./configuration/jellyfin/library:/config
       - ./content/media:/data
     ports:
       - 8096:8096
       - 8920:8920 #optional
       - 7359:7359/udp #optional
       - 1900:1900/udp #optional
-    restart: unless-stopped
-    networks:
-      - media-network
-
-  plex:
-    image: plexinc/pms-docker
-    container_name: plex
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - VERSION=docker
-      - HOSTNAME=”PlexServer”
-    volumes:
-      - ./provision/plex:/config
-      - ./content/media:/data/media
-    ports: # when network: bridge
-      - "32400:32400/tcp" 
-      - "8324:8324/tcp" # Required if network: bridge
-    privileged: true # libusb_init failed
     restart: unless-stopped
     networks:
       - media-network
@@ -49,7 +26,7 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
     volumes:
-      - ./provision/radarr:/config
+      - ./configuration/radarr:/config
       - ./content:/data
     ports:
       - "7878:7878"
@@ -65,26 +42,10 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
     volumes:
-      - ./provision/sonarr:/config
+      - ./configuration/sonarr:/config
       - ./content:/data
     ports:
       - "8989:8989"
-    restart: unless-stopped
-    networks:
-      - media-network
-
-  lidarr:
-    image: linuxserver/lidarr
-    container_name: lidarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Madrid
-    volumes:
-      - ./provision/lidarr:/config
-      - ./content:/data
-    ports:
-      - "8686:8686"
     restart: unless-stopped
     networks:
       - media-network
@@ -97,7 +58,7 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
     volumes:
-      - ./provision/prowlarr:/config
+      - ./configuration/prowlarr:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -112,7 +73,7 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
     volumes:
-      - ./provision/bazarr:/config
+      - ./configuration/bazarr:/config
       - ./content:/data
     ports:
       - "6767:6767"
@@ -128,25 +89,10 @@ services:
       - PGID=1000
       - TZ=Europe/Madrid
     volumes:
-      - ./provision/qbittorrent:/config
+      - ./configuration/qbittorrent:/config
       - ./content/torrents:/data/torrents
     ports:
       - "8080:8080"
-    restart: unless-stopped
-    networks:
-      - media-network
-
-  ombi:
-    image: linuxserver/ombi
-    container_name: ombi
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Madrid
-    volumes:
-      - ./provision/ombi:/config
-    ports:
-      - "3579:3579"
     restart: unless-stopped
     networks:
       - media-network
@@ -160,10 +106,52 @@ services:
     ports:
         - 5055:5055
     volumes:
-        - ./provision/jellyseerr/config:/app/config
+        - ./configuration/jellyseerr/config:/app/config
     restart: unless-stopped
     networks:
       - media-network
+
+  vpn-proxy:
+    image: qmcgaw/gluetun
+    container_name: vpn-proxy
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_TYPE=${VPN_TYPE}
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - OPENVPN_USER=${OPENVPN_USER}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - FREE_ONLY=on
+      - DOT=on
+      - TZ=Europe/Madrid
+      - UPDATER_PERIOD=24h
+    volumes:
+      - ./configuration/vpn:/gluetun
+    ports:
+      - "9981:8080"
+    devices:
+      - /dev/net/tun
+    restart: unless-stopped
+
+  m3u-stream-merger-proxy:
+    image: sonroyaalmerol/m3u-stream-merger-proxy:latest
+    container_name: m3u-stream-merger-proxy
+    network_mode: "service:vpn-proxy"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - SYNC_ON_BOOT=true
+      - SYNC_CRON=0 0 * * *
+      - M3U_URL_1=${M3U_URL_1}
+      - M3U_MAX_CONCURRENCY_1=${M3U_MAX_CONCURRENCY_1}
+      - M3U_URL_2=${M3U_URL_2}
+      - M3U_MAX_CONCURRENCY_2=${M3U_MAX_CONCURRENCY_2}
+      - BASE_URL=${BASE_URL}
+    restart: always
+    depends_on:
+      - vpn-proxy
+
 
 networks:
   media-network:

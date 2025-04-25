@@ -1,16 +1,20 @@
 # Ignore all files in the content directory
 
-content/*
+content/*/*/*
 
-# provision/*
-provision/jellyseerr/*
-provision/ombi/*
-provision/jellyfin/*
-provision/qbittorrent/*
-provision/bazarr/*
-provision/prowlarr/*
-provision/lidarr/*
-provision/sonarr/*
-provision/radarr/*
-provision/plex/*
+# configuration/*
+configuration/jellyseerr/*
+configuration/ombi/*
+configuration/jellyfin/*
+configuration/qbittorrent/*
+configuration/bazarr/*
+configuration/prowlarr/*
+configuration/lidarr/*
+configuration/sonarr/*
+configuration/radarr/*
+configuration/plex/*
+configuration/vpn/*
+
+# Ignore .env files
+.env
 

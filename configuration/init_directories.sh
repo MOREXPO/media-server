@@ -13,7 +13,7 @@ dirs=(
   "content/usenet/movies"
   "content/usenet/music"
   "content/usenet/tv"
-  "provision"
+  "configuration"
 )
 
 # Loop over the directories
