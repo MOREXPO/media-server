@@ -111,47 +111,27 @@ services:
     networks:
       - media-network
 
-  vpn-proxy:
-    image: qmcgaw/gluetun
-    container_name: vpn-proxy
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - VPN_TYPE=${VPN_TYPE}
-      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
-      - OPENVPN_USER=${OPENVPN_USER}
-      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
-      - FREE_ONLY=on
-      - DOT=on
-      - TZ=Europe/Madrid
-      - UPDATER_PERIOD=24h
-    volumes:
-      - ./configuration/vpn:/gluetun
-    ports:
-      - "9981:8080"
-    devices:
-      - /dev/net/tun
-    restart: unless-stopped
-
-  m3u-stream-merger-proxy:
-    image: sonroyaalmerol/m3u-stream-merger-proxy:latest
-    container_name: m3u-stream-merger-proxy
-    network_mode: "service:vpn-proxy"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Madrid
-      - SYNC_ON_BOOT=true
-      - SYNC_CRON=0 0 * * *
-      - M3U_URL_1=${M3U_URL_1}
-      - M3U_MAX_CONCURRENCY_1=${M3U_MAX_CONCURRENCY_1}
-      - M3U_URL_2=${M3U_URL_2}
-      - M3U_MAX_CONCURRENCY_2=${M3U_MAX_CONCURRENCY_2}
-      - BASE_URL=${BASE_URL}
-    restart: always
-    depends_on:
-      - vpn-proxy
-
+  #vpn-proxy:
+  #  image: qmcgaw/gluetun
+  #  container_name: vpn-proxy
+  #  cap_add:
+  #    - NET_ADMIN
+  #  environment:
+  #    - VPN_TYPE=${VPN_TYPE}
+  #    - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+  #    - OPENVPN_USER=${OPENVPN_USER}
+  #    - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+  #    - FREE_ONLY=on
+  #    - DOT=on
+  #    - TZ=Europe/Madrid
+  #    - UPDATER_PERIOD=24h
+  #  volumes:
+  #    - ./configuration/vpn:/gluetun
+  #  ports:
+  #    - "9981:8080"
+  #  devices:
+  #    - /dev/net/tun
+  #  restart: unless-stopped
 
 networks:
   media-network:
